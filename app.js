@@ -73,6 +73,22 @@ app.get("/get-places", async (req, res) => {
 //   console.log(err);
 // });
 
+app.get("/places/:placeId", async (req, res) => {
+  try {
+    const placeId = req.params.placeId;
+
+    if (!placeId) {
+      throw new Error("No place with this identification exists.");
+    }
+
+    const place = await Place.findOne({ _id: placeId });
+
+    res.json({ place: place });
+  } catch (error) {
+    return error;
+  }
+});
+
 try {
   app.listen(8080);
   mongoose
