@@ -47,7 +47,7 @@ app.get("/get-places", async (req, res) => {
 // dodaj middleware, kjer lahko dodaš novo lokacijo smao če si admin(prijavljen)
 // app.post("/post-places", (req, res) => {
 //   try {
-//     dodatneDestinacije.forEach(async (placeInfo) => {
+//     destinacije.forEach(async (placeInfo) => {
 //       const place = new Place({
 //         placeName: placeInfo.placeName,
 //         coordinates: placeInfo.coordinates,
@@ -69,9 +69,9 @@ app.get("/get-places", async (req, res) => {
 //   }
 // });
 
-// app.use((err, req, res, next) => {
-//   console.log(err);
-// });
+app.use((err, req, res, next) => {
+  console.log(err);
+});
 
 app.get("/places/:placeId", async (req, res) => {
   try {
