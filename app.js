@@ -31,7 +31,7 @@ app.get("/get-places", async (req, res) => {
     if (places.length === 0) {
       return res.json({
         message:
-          "No places to visit found with these filters, please try again.",
+          "Ni bilo najdenih izletov s temi zahtevami, prosim izberite druge možnosti.",
         statusCode: 404,
       });
     }
