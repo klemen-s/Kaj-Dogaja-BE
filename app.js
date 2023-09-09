@@ -20,7 +20,7 @@ app.get("/get-places", async (req, res) => {
   try {
     if (req.query.region === "" && req.query.tripType === "") {
       return res.json({
-        message: "Please fill out all of the missing filters.",
+        message: "Prosim izpolnite vsa polja za izlet.",
         statusCode: 422,
       });
     }
@@ -41,38 +41,19 @@ app.get("/get-places", async (req, res) => {
       });
     }
 
-    // glede na parametre najdemo kraje s temi zahtevami
     res.json({ places: places });
   } catch (error) {
     return error;
   }
 });
 
-// pot za objavljanje novih lokacij
-// dodaj middleware, kjer lahko dodaš novo lokacijo smao če si admin(prijavljen)
 app.post("/post-places", isAuth, (req, res) => {
   if (!req.isAuth) {
-    return res.json({ errorMsg: "Nimaš privilegijev za ta dejanja." });
+    return res.json({ errorMsg: "Nimaš privilegijev za to dejanje." });
   }
 
   try {
-    // destinacije.forEach(async (placeInfo) => {
-    //   const place = new Place({
-    //     placeName: placeInfo.placeName,
-    //     coordinates: placeInfo.coordinates,
-    //     imageUrl: placeInfo.imageUrl,
-    //     description: placeInfo.description,
-    //     region: placeInfo.region,
-    //     tripType: placeInfo.tripType,
-    //     budget: placeInfo.budget,
-    //     attractions: placeInfo.attractions,
-    //   });
-
-    //   const savedPlace = await place.save();
-    //   console.log(savedPlace);
-    // });
-
-    res.json({ message: "Items sucessfully saved" });
+    res.json({ isAuth: req.isAuth, message: "Imaš privilegije." });
   } catch (error) {
     return error;
   }
@@ -83,7 +64,7 @@ app.get("/places/:placeId", async (req, res) => {
     const placeId = req.params.placeId;
 
     if (!placeId) {
-      throw new Error("No place with this identification exists.");
+      throw new Error("Izlet s to oznako ne obstaja.");
     }
 
     const place = await Place.findOne({ _id: placeId });
@@ -99,21 +80,27 @@ app.post("/admin/login", async (req, res) => {
     const { username } = req.body;
     const { password } = req.body;
 
-    if (!username || !password) {
-      return res.json({ errorMsg: "Izpolnite vsa polja za prijavo." });
+    if (!username) {
+      return res.json({
+        usernameError: "Polje 'uporabniško ime' ni izpoljeno.",
+      });
+    }
+
+    if (!password) {
+      return res.json({ passwordError: "Polja 'geslo' ni izpoljeno." });
     }
 
     const user = await User.findOne({ username: username });
 
     if (!user) {
       return res.json({
-        errorMsg: "Uporabnik s tem imenom ne obstaja, poskusite znova.",
+        usernameError: "Uporabnik s tem imenom ne obstaja.",
       });
     } else {
       const match = await bcrypt.compare(password, user.password);
 
       if (match) {
-        const jwtToken =  await jwt.sign(
+        const jwtToken = await jwt.sign(
           { isLoggedIn: true, message: "Admin je prijavljen!" },
           process.env.SECRET_KEY,
           { expiresIn: 60 * 60 }
@@ -121,7 +108,7 @@ app.post("/admin/login", async (req, res) => {
 
         res.json({ jwt: jwtToken, message: "JWT poslan." });
       } else {
-        res.json({ errorMsg: "Nepravilno geslo, poskusite znova." });
+        res.json({ passwordError: "Nepravilno geslo." });
       }
     }
   } catch (error) {
