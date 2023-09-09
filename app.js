@@ -8,6 +8,7 @@ const bcrypt = require("bcrypt");
 
 const Place = require("./models/Place");
 const User = require("./models/User");
+const isAuth = require("./authenticatoin/isAuth");
 
 const app = express();
 
@@ -49,29 +50,33 @@ app.get("/get-places", async (req, res) => {
 
 // pot za objavljanje novih lokacij
 // dodaj middleware, kjer lahko dodaš novo lokacijo smao če si admin(prijavljen)
-// app.post("/post-places", (req, res) => {
-//   try {
-//     destinacije.forEach(async (placeInfo) => {
-//       const place = new Place({
-//         placeName: placeInfo.placeName,
-//         coordinates: placeInfo.coordinates,
-//         imageUrl: placeInfo.imageUrl,
-//         description: placeInfo.description,
-//         region: placeInfo.region,
-//         tripType: placeInfo.tripType,
-//         budget: placeInfo.budget,
-//         attractions: placeInfo.attractions,
-//       });
+app.post("/post-places", isAuth, (req, res) => {
+  if (!req.isAuth) {
+    return res.json({ errorMsg: "Nimaš privilegijev za ta dejanja." });
+  }
 
-//       const savedPlace = await place.save();
-//       console.log(savedPlace);
-//     });
+  try {
+    // destinacije.forEach(async (placeInfo) => {
+    //   const place = new Place({
+    //     placeName: placeInfo.placeName,
+    //     coordinates: placeInfo.coordinates,
+    //     imageUrl: placeInfo.imageUrl,
+    //     description: placeInfo.description,
+    //     region: placeInfo.region,
+    //     tripType: placeInfo.tripType,
+    //     budget: placeInfo.budget,
+    //     attractions: placeInfo.attractions,
+    //   });
 
-//     res.json({ message: "Items sucessfully saved" });
-//   } catch (error) {
-//     return error;
-//   }
-// });
+    //   const savedPlace = await place.save();
+    //   console.log(savedPlace);
+    // });
+
+    res.json({ message: "Items sucessfully saved" });
+  } catch (error) {
+    return error;
+  }
+});
 
 app.get("/places/:placeId", async (req, res) => {
   try {
@@ -89,43 +94,47 @@ app.get("/places/:placeId", async (req, res) => {
   }
 });
 
-// začasno bo ta pot uporabljena za registriranje, da ustvarimo enega admin uporabnika
-app.post("/admin/login", async (req, res, next) => {
+app.post("/admin/login", async (req, res) => {
   try {
     const { username } = req.body;
     const { password } = req.body;
-    console.log(username, password);
 
     if (!username || !password) {
-      const error = new Error("Fill out all of the inputs!");
-      throw error;
+      return res.json({ errorMsg: "Izpolnite vsa polja za prijavo." });
     }
 
-    let hashedPassword;
+    const user = await User.findOne({ username: username });
 
-    // hashing password
-    const hash = await bcrypt.hash(password, 12);
-    // Store hash in your password DB.
-    if (!hash) {
-      const error = new Error("No password provided");
-      throw error;
+    if (!user) {
+      return res.json({
+        errorMsg: "Uporabnik s tem imenom ne obstaja, poskusite znova.",
+      });
+    } else {
+      const match = await bcrypt.compare(password, user.password);
+
+      if (match) {
+        const jwtToken =  await jwt.sign(
+          { isLoggedIn: true, message: "Admin je prijavljen!" },
+          process.env.SECRET_KEY,
+          { expiresIn: 60 * 60 }
+        );
+
+        res.json({ jwt: jwtToken, message: "JWT poslan." });
+      } else {
+        res.json({ errorMsg: "Nepravilno geslo, poskusite znova." });
+      }
     }
-
-    const user = new User({ username: username, password: hash });
-
-    const savedUser = await user.save();
-    console.log(savedUser);
-
-    res.json({ message: "Successfully saved user", user: savedUser });
-
-    // const user = new User({username: username})
   } catch (error) {
     return error;
   }
 });
 
-app.use((err, req, res, next) => {
-  console.log(err);
+app.use((error, req, res, next) => {
+  console.log(error);
+  const status = error.statusCode;
+  const data = error.data;
+  const message = error.message;
+  res.status(status).json({ message: message, data: data });
 });
 
 try {
