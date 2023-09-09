@@ -2,8 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const Place = require("./models/Place");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+
+const Place = require("./models/Place");
+const User = require("./models/User");
 
 const app = express();
 
@@ -69,10 +72,6 @@ app.get("/get-places", async (req, res) => {
 //   }
 // });
 
-app.use((err, req, res, next) => {
-  console.log(err);
-});
-
 app.get("/places/:placeId", async (req, res) => {
   try {
     const placeId = req.params.placeId;
@@ -87,6 +86,25 @@ app.get("/places/:placeId", async (req, res) => {
   } catch (error) {
     return error;
   }
+});
+
+// začasno bo ta pot uporabljena za registriranje, da ustvarimo enega admin uporabnika
+app.get("/admin/login", (req, res) => {
+  try {
+
+    //register
+    
+    
+  } catch (error) {
+    
+  }
+  console.log("This route works");
+  res.json({ message: "This route works" });
+});
+
+
+app.use((err, req, res, next) => {
+  console.log(err);
 });
 
 try {
