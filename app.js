@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const Place = require("./models/Place");
 const User = require("./models/User");
@@ -89,19 +90,39 @@ app.get("/places/:placeId", async (req, res) => {
 });
 
 // začasno bo ta pot uporabljena za registriranje, da ustvarimo enega admin uporabnika
-app.get("/admin/login", (req, res) => {
+app.post("/admin/login", async (req, res, next) => {
   try {
+    const { username } = req.body;
+    const { password } = req.body;
+    console.log(username, password);
 
-    //register
-    
-    
+    if (!username || !password) {
+      const error = new Error("Fill out all of the inputs!");
+      throw error;
+    }
+
+    let hashedPassword;
+
+    // hashing password
+    const hash = await bcrypt.hash(password, 12);
+    // Store hash in your password DB.
+    if (!hash) {
+      const error = new Error("No password provided");
+      throw error;
+    }
+
+    const user = new User({ username: username, password: hash });
+
+    const savedUser = await user.save();
+    console.log(savedUser);
+
+    res.json({ message: "Successfully saved user", user: savedUser });
+
+    // const user = new User({username: username})
   } catch (error) {
-    
+    return error;
   }
-  console.log("This route works");
-  res.json({ message: "This route works" });
 });
-
 
 app.use((err, req, res, next) => {
   console.log(err);
