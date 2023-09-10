@@ -47,13 +47,21 @@ app.get("/get-places", async (req, res) => {
   }
 });
 
+app.get("/is-auth", isAuth, (req, res) => {
+  if (!req.isAuth) {
+    return res.json({ errorMsg: "Nimaš privilegijev za to dejanje." });
+  }
+
+  res.json({ isAuth: req.isAuth, message: "Imaš privilegije." });
+});
+
 app.post("/post-places", isAuth, (req, res) => {
   if (!req.isAuth) {
     return res.json({ errorMsg: "Nimaš privilegijev za to dejanje." });
   }
 
   try {
-    res.json({ isAuth: req.isAuth, message: "Imaš privilegije." });
+    res.json({message: "Tu lahko objavljaš nove izlete." });
   } catch (error) {
     return error;
   }
