@@ -8,7 +8,9 @@ const bcrypt = require("bcrypt");
 
 const Place = require("./models/Place");
 const User = require("./models/User");
-const isAuth = require("./authenticatoin/isAuth");
+const isAuth = require("./authentication/isAuth");
+
+const postPlacesRoutes = require("./routes/postPlacesRoutes");
 
 const app = express();
 
@@ -53,18 +55,6 @@ app.get("/is-auth", isAuth, (req, res) => {
   }
 
   res.json({ isAuth: req.isAuth, message: "Imaš privilegije." });
-});
-
-app.post("/post-places", isAuth, (req, res) => {
-  if (!req.isAuth) {
-    return res.json({ errorMsg: "Nimaš privilegijev za to dejanje." });
-  }
-
-  try {
-    res.json({message: "Tu lahko objavljaš nove izlete." });
-  } catch (error) {
-    return error;
-  }
 });
 
 app.get("/places/:placeId", async (req, res) => {
@@ -123,6 +113,8 @@ app.post("/admin/login", async (req, res) => {
     return error;
   }
 });
+
+app.use("/post-places", postPlacesRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
