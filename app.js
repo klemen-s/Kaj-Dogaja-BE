@@ -114,7 +114,7 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-app.use("/post-places", postPlacesRoutes);
+app.use("/post-place", postPlacesRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);

@@ -4,7 +4,7 @@ const router = express.Router();
 const isAuth = require("../authentication/isAuth");
 const Place = require("../models/Place");
 
-router.post("/", isAuth, async (req, res) => {
+router.post("/", async (req, res) => {
   if (!req.isAuth) {
     return res.json({ errorMsg: "Nimaš privilegijev za to dejanje." });
   }
@@ -19,12 +19,12 @@ router.post("/", isAuth, async (req, res) => {
   }
 });
 
-router.post("/placeName", isAuth, async (req, res) => {
+router.post("/placeName", async (req, res) => {
   try {
     const placeName = await Place.findOne({ placeName: req.body.placeName });
 
     if (placeName) {
-      res.json({
+      return res.json({
         message: "Ta izlet že obstaja. Ustvari nov izlet.",
         isError: true,
       });
