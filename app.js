@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const helmet = require("helmet");
+const compression = require("compression");
 
 const Place = require("./models/Place");
 const User = require("./models/User");
@@ -15,6 +17,10 @@ const postPlacesRoutes = require("./routes/postPlacesRoutes");
 const app = express();
 
 app.use(cors());
+
+app.use(helmet());
+app.use(compression());
+
 app.use(bodyParser.json());
 
 // pot za dobivanje lokacij glede na določene filtre
@@ -114,7 +120,7 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-app.use("/post-place",isAuth, postPlacesRoutes);
+app.use("/post-place", isAuth, postPlacesRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
