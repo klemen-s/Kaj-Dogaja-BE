@@ -142,7 +142,7 @@ app.use((error, req, res, next) => {
 });
 
 try {
-  app.listen(8080);
+  app.listen(process.env.PORT || 8080);
   mongoose
     .connect(
       `mongodb+srv://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PASSWORD}@cluster0.xyukcbr.mongodb.net/${process.env.MONGO_STORE}?retryWrites=true&w=majority`
