@@ -134,7 +134,6 @@ app.post("/admin/login", async (req, res) => {
 app.use("/post-place", isAuth, postPlacesRoutes);
 
 app.use((error, req, res, next) => {
-  console.log(error);
   const status = error.statusCode;
   const data = error.data;
   const message = error.message;
